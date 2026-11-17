@@ -208,17 +208,39 @@ export async function revokeOnboardingToken(token: string) {
 }
 
 
+const START_ERROR_MESSAGE =
+  "Onboarding is temporarily unavailable. Please try again in a moment, or email info@aivized.com if it persists.";
+
+async function createDraftSubmission(tokenHash: string) {
+  return prisma.clientSubmission.create({
+    data: {
+      tokenHash,
+      status: "DRAFT",
+      tokenExpiresAt: getTokenExpiryDate(TOKEN_TTL_DAYS),
+    },
+  });
+}
+
 export async function beginClientOnboarding() {
   try {
     const token = generateToken();
     const tokenHash = hashToken(token);
-    const submission = await prisma.clientSubmission.create({
-      data: {
-        tokenHash,
-        status: "DRAFT",
-        tokenExpiresAt: getTokenExpiryDate(TOKEN_TTL_DAYS),
-      },
-    });
+    let submission: Awaited<ReturnType<typeof createDraftSubmission>> | null = null;
+
+    for (let attempt = 0; attempt < 2 && !submission; attempt += 1) {
+      try {
+        submission = await createDraftSubmission(tokenHash);
+      } catch (error) {
+        console.error(`[beginClientOnboarding] draft create failed (attempt ${attempt + 1})`, error);
+        if (attempt === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+      }
+    }
+
+    if (!submission) {
+      return { ok: false as const, error: START_ERROR_MESSAGE };
+    }
 
     const cookieStore = await cookies();
     cookieStore.set({
@@ -231,8 +253,9 @@ export async function beginClientOnboarding() {
     });
 
     return { ok: true as const, token, submissionId: submission.id };
-  } catch {
-    return { ok: false as const, error: "Onboarding is temporarily unavailable. Please try again in a moment." };
+  } catch (error) {
+    console.error("[beginClientOnboarding] unexpected error", error);
+    return { ok: false as const, error: START_ERROR_MESSAGE };
   }
 }
 
