@@ -6,6 +6,14 @@ import { NewSubmissionNotificationEmail, type OnboardingEmailPayload } from "@/l
 
 const FALLBACK_ERROR = "We couldn't send your submission right now. Please email info@aivized.com directly.";
 
+function resendErrorMessage(error: unknown) {
+  if (error && typeof error === "object" && "message" in error) {
+    const message = String((error as { message?: unknown }).message ?? "").trim();
+    if (message) return message;
+  }
+  return null;
+}
+
 function parseRecipients(value: string | undefined) {
   if (!value) return ["info@aivized.com"];
   const list = value
@@ -38,12 +46,14 @@ export async function sendOnboardingEmail(payload: OnboardingEmailPayload) {
 
     if (error) {
       console.error("[email] resend rejected the send", error);
-      return { ok: false as const, error: FALLBACK_ERROR };
+      const detail = resendErrorMessage(error);
+      return { ok: false as const, error: detail ? `Email delivery failed: ${detail}` : FALLBACK_ERROR };
     }
 
     return { ok: true as const };
   } catch (error) {
     console.error("[email] resend request failed", error);
-    return { ok: false as const, error: FALLBACK_ERROR };
+    const detail = resendErrorMessage(error);
+    return { ok: false as const, error: detail ? `Email delivery failed: ${detail}` : FALLBACK_ERROR };
   }
 }
