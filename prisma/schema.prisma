@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  ACCEPTED
+  DECLINED
+}
+
+model ClientSubmission {
+  id                      String               @id @default(cuid())
+  tokenHash               String               @unique
+  tokenExpiresAt          DateTime?
+  revokedAt               DateTime?
+  status                  SubmissionStatus    @default(DRAFT)
+  notificationStatus      String               @default("PENDING")
+  adminNotes              String?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  submittedAt             DateTime?
+
+  clientName              String?
+  clientEmail             String?
+  clientPhone            String?
+  whatsappNumber         String?
+  companyName            String?
+  websiteUrl             String?
+  country                String?
+  preferredChannel      String?
+  referredBy             String?
+
+  industry               String?
+  businessType           String?
+  businessDescription   String?
+  businessAudience       String?
+  primaryMarket          String?
+  existingWebsite        String?
+  mainCompetitors        String?
+  currentChallenges     String?
+
+  projectName            String?
+  projectType            String?
+  projectDescription     String?
+  primaryObjective       String?
+  expectedOutcome        String?
+  projectAudience        String?
+  mainProblemSolved      String?
+  projectScope           String?
+  services               String[]
+
+  serviceAnswers        Json?
+  designStyle           String?
+  brandColors           String?
+  preferredTypography   String?
+  hasBrandIdentity     Boolean?
+  logoKey               String?
+
+  domainRegistrar        String?
+  hostingProvider        String?
+  existingCrm            String?
+  existingRepositoryUrl  String?
+  apiIntegrations        String?
+  thirdPartyPlatforms    String?
+  availableDocs          String?
+  existingAssets        String?
+
+  desiredStartDate      DateTime?
+  expectedCompletionDate DateTime?
+  projectUrgency        String?
+  budgetRange           String?
+  customBudget          String?
+  milestones            String?
+  timelineNotes         String?
+
+  files OnboardingFile[]
+
+  @@index([status, createdAt])
+  @@index([clientEmail])
+}
+
+model OnboardingFile {
+  id            String   @id @default(cuid())
+  submissionId String
+  submission   ClientSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  name          String
+  key           String
+  url           String
+  size          Int
+  mimeType      String
+  createdAt     DateTime @default(now())
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}
+

@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 215 22% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 22% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 22% 12%;
+    --primary: 16 60% 46%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 16 72% 88%;
+    --primary-muted: 16 60% 94%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 215 22% 12%;
+    --muted: 0 0% 100%;
+    --muted-foreground: 215 8% 50%;
+    --accent: 158 36% 30%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 34 18% 88%;
+    --input: 34 18% 88%;
+    --ring: 16 60% 46%;
+    --surface: 38 38% 97%;
+    --surface-strong: 34 28% 94%;
+    --surface-ink: 215 22% 12%;
+    --radius: 0.75rem;
+    --font-manrope: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-foreground;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
