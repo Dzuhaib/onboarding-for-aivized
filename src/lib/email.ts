@@ -2,9 +2,9 @@ import "server-only";
 
 import { Resend } from "resend";
 
-import { APP_NAME } from "@/lib/constants";
-import { prisma } from "@/lib/prisma";
-import { NewSubmissionNotificationEmail } from "@/lib/email/templates/NewSubmissionNotificationEmail";
+import { NewSubmissionNotificationEmail, type OnboardingEmailPayload } from "@/lib/email/templates/NewSubmissionNotificationEmail";
+
+const FALLBACK_ERROR = "We couldn't send your submission right now. Please email info@aivized.com directly.";
 
 function parseRecipients(value: string | undefined) {
   if (!value) return ["info@aivized.com"];
@@ -15,66 +15,35 @@ function parseRecipients(value: string | undefined) {
   return list.length > 0 ? list : ["info@aivized.com"];
 }
 
-export async function sendNewSubmissionNotification(params: { submissionId: string }) {
-  const submission = await prisma.clientSubmission.findUnique({
-    where: { id: params.submissionId },
-    include: { files: true },
-  });
-
-  if (!submission) {
-    return { ok: false as const, error: "Submission not found" };
-  }
-
+export async function sendOnboardingEmail(payload: OnboardingEmailPayload) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    await prisma.clientSubmission.update({
-      where: { id: submission.id },
-      data: { notificationStatus: "SKIPPED" },
-    });
-    return { ok: true as const, skipped: true as const };
+    console.error("[email] RESEND_API_KEY is not set");
+    return { ok: false as const, error: "Email is not configured yet. Please email info@aivized.com directly." };
   }
 
   const resend = new Resend(apiKey);
   const from = process.env.RESEND_FROM_EMAIL ?? "AIVized <onboarding@aivized.com>";
   const to = parseRecipients(process.env.RESEND_TO_EMAILS);
+  const company = payload.companyName ? ` (${payload.companyName})` : "";
 
   try {
-    const result = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from,
       to,
-      subject: `New AIVized onboarding submission${submission.companyName ? ` - ${submission.companyName}` : ""}`,
-      react: NewSubmissionNotificationEmail({
-        submission: {
-          id: submission.id,
-          clientName: submission.clientName ?? "Client",
-          clientEmail: submission.clientEmail ?? "",
-          companyName: submission.companyName,
-          services: submission.services,
-          status: submission.status,
-          submittedAt: submission.submittedAt,
-          budgetRange: submission.budgetRange,
-          urgency: submission.projectUrgency,
-          files: submission.files,
-        },
-        agency: {
-          name: APP_NAME,
-          email: to[0],
-        },
-      }),
+      replyTo: payload.workEmail,
+      subject: `New onboarding submission - ${payload.fullName}${company}`,
+      react: NewSubmissionNotificationEmail({ payload }),
     });
 
-    await prisma.clientSubmission.update({
-      where: { id: submission.id },
-      data: { notificationStatus: result.data?.id ? "SENT" : "FAILED" },
-    });
+    if (error) {
+      console.error("[email] resend rejected the send", error);
+      return { ok: false as const, error: FALLBACK_ERROR };
+    }
 
-    return { ok: true as const, id: result.data?.id };
-  } catch {
-    await prisma.clientSubmission.update({
-      where: { id: submission.id },
-      data: { notificationStatus: "FAILED" },
-    });
-    return { ok: false as const, error: "Email delivery failed" };
+    return { ok: true as const };
+  } catch (error) {
+    console.error("[email] resend request failed", error);
+    return { ok: false as const, error: FALLBACK_ERROR };
   }
 }
-

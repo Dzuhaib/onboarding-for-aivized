@@ -1,29 +1,34 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
-
 export const dynamic = "force-dynamic";
 
+function parseRecipients(value: string | undefined) {
+  return (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 export async function GET() {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-  } catch (error) {
-    console.error("[health] database connection failed", error);
+  const apiKey = Boolean(process.env.RESEND_API_KEY);
+  const from = process.env.RESEND_FROM_EMAIL ?? null;
+  const recipients = parseRecipients(process.env.RESEND_TO_EMAILS);
+
+  if (!apiKey) {
     return NextResponse.json(
-      { status: "error", database: "unreachable", hint: "Check DATABASE_URL for this environment." },
+      {
+        status: "error",
+        email: "not_configured",
+        hint: "Set RESEND_API_KEY, RESEND_FROM_EMAIL and RESEND_TO_EMAILS in this environment.",
+      },
       { status: 503 },
     );
   }
 
-  try {
-    await prisma.clientSubmission.count();
-  } catch (error) {
-    console.error("[health] schema check failed", error);
-    return NextResponse.json(
-      { status: "error", database: "connected", schema: "missing", hint: "Run `npx prisma db push` against this database." },
-      { status: 503 },
-    );
-  }
-
-  return NextResponse.json({ status: "ok", database: "connected", schema: "ready" });
+  return NextResponse.json({
+    status: "ok",
+    email: "configured",
+    from,
+    recipients: recipients.length,
+  });
 }

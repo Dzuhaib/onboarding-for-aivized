@@ -5,8 +5,7 @@ function emptyToUndefined(value: unknown) {
   return value;
 }
 
-const optionalText = (max: number) =>
-  z.preprocess(emptyToUndefined, z.string().max(max).optional());
+const optionalText = (max: number) => z.preprocess(emptyToUndefined, z.string().max(max).optional());
 
 const optionalDate = z.preprocess(emptyToUndefined, z.string().optional());
 
@@ -50,17 +49,3 @@ export const finalSubmissionSchema = z.object({
 });
 
 export type FinalSubmissionValues = z.infer<typeof finalSubmissionSchema>;
-
-export const onboardingTokenSchema = z.object({
-  token: z.string().min(20, "Invalid onboarding link").max(128),
-});
-
-export const updateSubmissionStatusSchema = z.object({
-  id: z.string().min(1),
-  status: z.enum(["DRAFT", "SUBMITTED", "IN_REVIEW", "ACCEPTED", "DECLINED"]),
-});
-
-export const updateSubmissionNotesSchema = z.object({
-  id: z.string().min(1),
-  notes: z.string().max(20000),
-});

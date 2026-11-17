@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -25,7 +25,7 @@ import {
   PROJECT_URGENCIES,
   REFERRAL_OPTIONS,
 } from "@/lib/constants";
-import { saveOnboardingDraft, submitOnboarding } from "@/actions/onboarding";
+import { submitOnboarding } from "@/actions/onboarding";
 import { finalSubmissionSchema } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
@@ -50,19 +50,26 @@ export interface OnboardingFormValues {
   confirmation: boolean;
 }
 
-interface Props {
-  token: string;
-  submission: Record<string, any>;
-  expired: boolean;
-  revoked: boolean;
-}
-
-function toDateInput(value: unknown) {
-  if (!value) return "";
-  const date = new Date(value as string);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
-}
+const EMPTY_VALUES: OnboardingFormValues = {
+  fullName: "",
+  workEmail: "",
+  phoneNumber: "",
+  companyName: "",
+  country: "",
+  referredBy: "",
+  preferredChannel: "Email",
+  industry: "",
+  businessType: "",
+  businessDescription: "",
+  projectType: "",
+  projectDescription: "",
+  projectScope: "",
+  services: [],
+  desiredStartDate: "",
+  projectUrgency: "",
+  budgetRange: "",
+  confirmation: false,
+};
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -96,40 +103,14 @@ function Section({
   );
 }
 
-export function OnboardingForm({ token, submission, expired, revoked }: Props) {
-  const [saving, setSaving] = useState(false);
+export function OnboardingForm() {
   const [submitting, setSubmitting] = useState(false);
-
-  const defaultValues = useMemo<OnboardingFormValues>(
-    () => ({
-      fullName: submission?.clientName ?? "",
-      workEmail: submission?.clientEmail ?? "",
-      phoneNumber: submission?.clientPhone ?? "",
-      companyName: submission?.companyName ?? "",
-      country: submission?.country ?? "",
-      referredBy: submission?.referredBy ?? "",
-      preferredChannel: submission?.preferredChannel || "Email",
-      industry: submission?.industry ?? "",
-      businessType: submission?.businessType ?? "",
-      businessDescription: submission?.businessDescription ?? "",
-      projectType: submission?.projectType ?? "",
-      projectDescription: submission?.projectDescription ?? "",
-      projectScope: submission?.projectScope ?? "",
-      services: submission?.services ?? [],
-      desiredStartDate: toDateInput(submission?.desiredStartDate),
-      projectUrgency: submission?.projectUrgency ?? "",
-      budgetRange: submission?.budgetRange ?? "",
-      confirmation: false,
-    }),
-    [submission]
-  );
 
   const {
     register,
     control,
     handleSubmit,
     watch,
-    getValues,
     setValue,
     setError,
     clearErrors,
@@ -137,33 +118,15 @@ export function OnboardingForm({ token, submission, expired, revoked }: Props) {
     formState: { errors },
   } = useForm<OnboardingFormValues>({
     resolver: zodResolver(finalSubmissionSchema),
-    defaultValues,
+    defaultValues: EMPTY_VALUES,
     mode: "onSubmit",
   });
 
   const services = watch("services") ?? [];
 
-  async function persistDraft() {
-    setSaving(true);
-    const result = await saveOnboardingDraft(token, getValues());
-    setSaving(false);
-    if (!result.ok) {
-      toast.error("Progress could not be saved", { description: result.error });
-      return false;
-    }
-    return true;
-  }
-
-  async function handleSave() {
-    const saved = await persistDraft();
-    if (saved) {
-      toast.success("Progress saved", { description: "You can return to this link to finish later." });
-    }
-  }
-
   async function handleSubmitFinal(values: OnboardingFormValues) {
     setSubmitting(true);
-    const result = await submitOnboarding(token, values, []);
+    const result = await submitOnboarding(values);
     setSubmitting(false);
 
     if (!result.ok) {
@@ -179,32 +142,6 @@ export function OnboardingForm({ token, submission, expired, revoked }: Props) {
 
     toast.success("Onboarding submitted", { description: "Our team will review your details shortly." });
     window.location.href = "/submission/success";
-  }
-
-  if (expired) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6">
-        <Card className="max-w-lg">
-          <CardContent className="p-8 text-center">
-            <h1 className="text-2xl font-semibold">This onboarding link has expired</h1>
-            <p className="mt-3 text-muted-foreground">Please contact AIVized to request a new onboarding link.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (revoked) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6">
-        <Card className="max-w-lg">
-          <CardContent className="p-8 text-center">
-            <h1 className="text-2xl font-semibold">This onboarding link is no longer active</h1>
-            <p className="mt-3 text-muted-foreground">Please contact AIVized to request a new onboarding link.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
   }
 
   return (
@@ -229,7 +166,7 @@ export function OnboardingForm({ token, submission, expired, revoked }: Props) {
               aria-label="Start over"
               className="rounded-full border-border/80 bg-background/70 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground sm:px-4"
               onClick={() => {
-                reset(defaultValues);
+                reset(EMPTY_VALUES);
                 clearErrors();
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
@@ -256,8 +193,8 @@ export function OnboardingForm({ token, submission, expired, revoked }: Props) {
             Let&apos;s get your project started.
           </h1>
           <p className="mt-5 max-w-xl text-[17px] leading-8 text-muted-foreground">
-            Tell us about your business and your project. Everything is on this single page, and your progress is saved
-            automatically as you go.
+            Tell us about your business and your project. Everything is on this single page and is sent straight to our
+            team when you submit.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3 text-[13px] text-muted-foreground">
             <span className="flex items-center gap-2">
@@ -270,7 +207,7 @@ export function OnboardingForm({ token, submission, expired, revoked }: Props) {
             </span>
             <span className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary/70" />
-              Saved as you go
+              One page, no account needed
             </span>
           </div>
         </div>
@@ -546,21 +483,11 @@ export function OnboardingForm({ token, submission, expired, revoked }: Props) {
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   Submit onboarding
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full border-border/80 bg-background/70"
-                  onClick={handleSave}
-                  disabled={saving || submitting}
-                >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Save progress
-                </Button>
               </div>
 
               <p className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Your information is stored securely and only shared with the AIVIZED team.
+                Your details are emailed directly to the AIVIZED team and are not stored on this site.
               </p>
             </CardContent>
           </Card>

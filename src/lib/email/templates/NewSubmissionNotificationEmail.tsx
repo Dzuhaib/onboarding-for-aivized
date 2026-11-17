@@ -1,55 +1,113 @@
-import { Body, Heading, Html, Preview, Section, Text } from "@react-email/components";
+import { Body, Heading, Hr, Html, Preview, Section, Text } from "@react-email/components";
 
-interface NewSubmissionNotificationEmailProps {
-  submission: {
-    id: string;
-    clientName: string;
-    clientEmail: string;
-    companyName?: string | null;
-    services: string[];
-    status: string;
-    submittedAt?: Date | null;
-    budgetRange?: string | null;
-    urgency?: string | null;
-    files: { name: string; url: string; size: number; mimeType: string }[];
-  };
-  agency: {
-    name: string;
-    email: string;
-  };
+export interface OnboardingEmailPayload {
+  fullName: string;
+  workEmail: string;
+  phoneNumber?: string;
+  companyName?: string;
+  country?: string;
+  referredBy?: string;
+  preferredChannel?: string;
+  industry?: string;
+  businessType?: string;
+  businessDescription?: string;
+  projectType: string;
+  projectDescription?: string;
+  services: string[];
+  projectScope?: string;
+  desiredStartDate?: string;
+  projectUrgency?: string;
+  budgetRange?: string;
 }
 
-export function NewSubmissionNotificationEmail({ submission, agency }: NewSubmissionNotificationEmailProps) {
+const labelStyle = {
+  margin: 0,
+  fontSize: "11px",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "#8a8f98",
+};
+
+const valueStyle = {
+  margin: "4px 0 0",
+  fontSize: "15px",
+  lineHeight: "24px",
+  color: "#16181d",
+  whiteSpace: "pre-wrap" as const,
+};
+
+function Field({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div style={{ marginTop: "16px" }}>
+      <p style={labelStyle}>{label}</p>
+      <p style={valueStyle}>{value}</p>
+    </div>
+  );
+}
+
+export function NewSubmissionNotificationEmail({ payload }: { payload: OnboardingEmailPayload }) {
+  const services = payload.services.length > 0 ? payload.services.join(", ") : undefined;
+
   return (
     <Html lang="en">
-      <Body style={{ fontFamily: "Manrope, sans-serif", backgroundColor: "#ffffff", color: "#16181d" }}>
+      <Preview>
+        New onboarding submission from {payload.fullName}
+        {payload.companyName ? ` (${payload.companyName})` : ""}
+      </Preview>
+      <Body style={{ fontFamily: "Manrope, Arial, sans-serif", backgroundColor: "#ffffff", color: "#16181d" }}>
         <Section style={{ padding: "32px 16px" }}>
-          <div style={{ maxWidth: 560, margin: "0 auto", backgroundColor: "#ffffff", border: "1px solid #e7e2d9", borderRadius: "12px", padding: "32px" }}>
-            <Heading style={{ fontSize: "24px", margin: 0, color: "#16181d" }}>
-              New onboarding submission
-            </Heading>
-            <Text style={{ marginTop: "16px", fontSize: "15px", lineHeight: "24px" }}>
-              {submission.clientName} has submitted an onboarding form for {agency.name}.
+          <div
+            style={{
+              maxWidth: 560,
+              margin: "0 auto",
+              backgroundColor: "#ffffff",
+              border: "1px solid #e7e2d9",
+              borderRadius: "12px",
+              padding: "32px",
+            }}
+          >
+            <Heading style={{ fontSize: "24px", margin: 0, color: "#16181d" }}>New onboarding submission</Heading>
+            <Text style={{ marginTop: "12px", fontSize: "15px", lineHeight: "24px", color: "#4b5563" }}>
+              Submitted {new Date().toLocaleString("en-GB", { timeZone: "Asia/Dubai" })} (Dubai time). Reply to this
+              email to reach the client directly.
             </Text>
-            <Text style={{ marginTop: "8px", fontSize: "15px", lineHeight: "24px" }}>
-              Company: {submission.companyName ?? "Not specified"}
-            </Text>
-            <Text style={{ marginTop: "8px", fontSize: "15px", lineHeight: "24px" }}>
-              Services: {(submission.services ?? []).join(", ") || "Not specified"}
-            </Text>
-            <Text style={{ marginTop: "8px", fontSize: "15px", lineHeight: "24px" }}>
-              Client email: {submission.clientEmail}
-            </Text>
-            <Text style={{ marginTop: "8px", fontSize: "15px", lineHeight: "24px" }}>
-              Budget range: {submission.budgetRange ?? "Not specified"}
-            </Text>
-            {submission.files && submission.files.length > 0 ? (
-              <Text style={{ marginTop: "8px", fontSize: "15px", lineHeight: "24px" }}>
-                Uploaded assets: {(submission.files ?? []).map((file) => file.name).join(", ")}
-              </Text>
-            ) : null}
-            <Text style={{ marginTop: "24px", fontSize: "14px", lineHeight: "24px", color: "#6b7280" }}>
-              This is the beginning of a new AIVized client engagement.
+
+            <Hr style={{ borderColor: "#e7e2d9", margin: "24px 0 8px" }} />
+
+            <Text style={{ ...labelStyle, marginTop: "16px", color: "#bc542f" }}>Client</Text>
+            <Field label="Full name" value={payload.fullName} />
+            <Field label="Work email" value={payload.workEmail} />
+            <Field label="Phone number" value={payload.phoneNumber} />
+            <Field label="Company" value={payload.companyName} />
+            <Field label="Country" value={payload.country} />
+            <Field label="Referred by" value={payload.referredBy} />
+            <Field label="Preferred channel" value={payload.preferredChannel} />
+
+            <Hr style={{ borderColor: "#e7e2d9", margin: "24px 0 8px" }} />
+
+            <Text style={{ ...labelStyle, marginTop: "16px", color: "#bc542f" }}>Business</Text>
+            <Field label="Industry" value={payload.industry} />
+            <Field label="Business type" value={payload.businessType} />
+            <Field label="Business description" value={payload.businessDescription} />
+
+            <Hr style={{ borderColor: "#e7e2d9", margin: "24px 0 8px" }} />
+
+            <Text style={{ ...labelStyle, marginTop: "16px", color: "#bc542f" }}>Project</Text>
+            <Field label="Project type" value={payload.projectType} />
+            <Field label="Services" value={services} />
+            <Field label="Project description" value={payload.projectDescription} />
+            <Field label="Project scope" value={payload.projectScope} />
+
+            <Hr style={{ borderColor: "#e7e2d9", margin: "24px 0 8px" }} />
+
+            <Text style={{ ...labelStyle, marginTop: "16px", color: "#bc542f" }}>Timeline and budget</Text>
+            <Field label="Desired start date" value={payload.desiredStartDate} />
+            <Field label="Urgency" value={payload.projectUrgency} />
+            <Field label="Budget range" value={payload.budgetRange} />
+
+            <Text style={{ marginTop: "28px", fontSize: "13px", lineHeight: "22px", color: "#8a8f98" }}>
+              Sent from the AIVized client onboarding form.
             </Text>
           </div>
         </Section>
