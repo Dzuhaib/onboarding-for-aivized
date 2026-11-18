@@ -31,7 +31,7 @@ export async function sendOnboardingEmail(payload: OnboardingEmailPayload) {
   }
 
   const resend = new Resend(apiKey);
-  const from = process.env.RESEND_FROM_EMAIL ?? "AIVized <onboarding@aivized.com>";
+  const from = process.env.RESEND_FROM_EMAIL ?? "AIVized <onboarding@onboard.aivized.com>";
   const to = parseRecipients(process.env.RESEND_TO_EMAILS);
   const company = payload.companyName ? ` (${payload.companyName})` : "";
 
