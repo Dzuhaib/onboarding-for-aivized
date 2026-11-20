@@ -11,7 +11,6 @@ export interface OnboardingEmailPayload {
   industry?: string;
   businessType?: string;
   businessDescription?: string;
-  projectType: string;
   projectDescription?: string;
   services: string[];
   projectScope?: string;
@@ -94,7 +93,6 @@ export function NewSubmissionNotificationEmail({ payload }: { payload: Onboardin
             <Hr style={{ borderColor: "#e7e2d9", margin: "24px 0 8px" }} />
 
             <Text style={{ ...labelStyle, marginTop: "16px", color: "#bc542f" }}>Project</Text>
-            <Field label="Project type" value={payload.projectType} />
             <Field label="Services" value={services} />
             <Field label="Project description" value={payload.projectDescription} />
             <Field label="Project scope" value={payload.projectScope} />

@@ -26,7 +26,6 @@ export const businessInfoSchema = z.object({
 });
 
 export const projectOverviewSchema = z.object({
-  projectType: z.string().min(1, "Project type is required").max(120),
   projectDescription: optionalText(8000),
   projectScope: optionalText(8000),
   services: z.array(z.string()).min(1, "Select at least one service").max(12),

@@ -30,7 +30,6 @@ export async function submitOnboarding(values: unknown) {
     industry: data.industry,
     businessType: data.businessType,
     businessDescription: data.businessDescription,
-    projectType: data.projectType,
     projectDescription: data.projectDescription,
     services: data.services,
     projectScope: data.projectScope,

@@ -1,6 +1,6 @@
 export const APP_NAME = "AIVized";
 
-export const PROJECT_TYPES = [
+export const SERVICES = [
   "Website Development",
   "E-commerce Development",
   "AI Chatbot Development",

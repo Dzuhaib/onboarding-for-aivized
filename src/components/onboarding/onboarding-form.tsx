@@ -21,9 +21,9 @@ import {
   COMMUNICATION_CHANNELS,
   COUNTRIES,
   INDUSTRIES,
-  PROJECT_TYPES,
   PROJECT_URGENCIES,
   REFERRAL_OPTIONS,
+  SERVICES,
 } from "@/lib/constants";
 import { submitOnboarding } from "@/actions/onboarding";
 import { finalSubmissionSchema } from "@/lib/validations";
@@ -40,7 +40,6 @@ export interface OnboardingFormValues {
   industry?: string;
   businessType?: string;
   businessDescription?: string;
-  projectType: string;
   projectDescription?: string;
   projectScope?: string;
   services: string[];
@@ -61,7 +60,6 @@ const EMPTY_VALUES: OnboardingFormValues = {
   industry: "",
   businessType: "",
   businessDescription: "",
-  projectType: "",
   projectDescription: "",
   projectScope: "",
   services: [],
@@ -331,31 +329,13 @@ export function OnboardingForm() {
 
           <Section step="03" title="Project overview" description="What do you want to build and why.">
             <div className="space-y-2">
-              <Label htmlFor="projectType">Project type</Label>
-              <Controller
-                control={control}
-                name="projectType"
-                render={({ field }) => (
-                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                    <option value="">Select project type</option>
-                    {PROJECT_TYPES.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </Select>
-                )}
-              />
-              <FieldError message={errors.projectType?.message} />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="projectDescription">Project description</Label>
               <Textarea id="projectDescription" {...register("projectDescription")} placeholder="Describe the project in your own words." />
             </div>
             <div className="space-y-3">
               <Label>Services required</Label>
               <div className="grid gap-2 sm:grid-cols-2">
-                {PROJECT_TYPES.map((type) => {
+                {SERVICES.map((type) => {
                   const selected = services.includes(type);
                   return (
                     <label
