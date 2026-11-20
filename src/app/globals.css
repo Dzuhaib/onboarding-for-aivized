@@ -97,6 +97,23 @@
   }
 }
 
+@keyframes glow-drift {
+  0%,
+  100% {
+    transform: translate3d(0, -10px, 0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate3d(0, 10px, 0);
+    opacity: 1;
+  }
+}
+
+.animate-glow {
+  animation: glow-drift 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 .animate-rise {
   animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -112,7 +129,8 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-pop,
-  .animate-ripple {
+  .animate-ripple,
+  .animate-glow {
     animation: none;
   }
 }

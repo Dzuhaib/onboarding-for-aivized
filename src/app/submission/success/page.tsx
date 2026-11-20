@@ -52,7 +52,7 @@ export default function SubmissionSuccessPage() {
       <main className="relative mx-auto max-w-3xl px-6 pb-20 pt-14 md:pt-20">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 -top-12 h-96 bg-[radial-gradient(65%_100%_at_50%_0%,hsl(16_60%_46%/0.10),transparent_72%)]"
+          className="animate-glow pointer-events-none absolute inset-x-0 -top-16 h-96 bg-[radial-gradient(65%_100%_at_50%_0%,hsl(16_60%_46%/0.10),transparent_72%)]"
         />
 
         <div className="relative flex flex-col items-center text-center">

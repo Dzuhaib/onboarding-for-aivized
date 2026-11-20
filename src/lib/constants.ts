@@ -75,6 +75,7 @@ export const BUDGET_RANGES = [
 export const PROJECT_URGENCIES = ["Low", "Medium", "High", "Critical"] as const;
 
 export const TEAM_MEMBERS = [
+  "Miss PA",
   "Ameer Hamza",
   "Sana Farasat",
   "Shagufta",

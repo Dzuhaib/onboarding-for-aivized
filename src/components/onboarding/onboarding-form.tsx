@@ -180,7 +180,7 @@ export function OnboardingForm() {
       <main className="relative mx-auto max-w-4xl px-6 pb-20 pt-14 md:pt-20">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 -top-12 h-80 bg-[radial-gradient(65%_100%_at_50%_0%,hsl(16_60%_46%/0.09),transparent_72%)]"
+          className="animate-glow pointer-events-none absolute inset-x-0 -top-16 h-96 bg-[radial-gradient(65%_100%_at_50%_0%,hsl(16_60%_46%/0.09),transparent_72%)]"
         />
         <div className="relative max-w-2xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
