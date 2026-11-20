@@ -35,7 +35,7 @@ export default function SubmissionSuccessPage() {
       <header className="border-b border-border/60 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-6 md:h-20">
           <div className="flex items-center gap-4">
-            <BrandLogo className="h-8 md:h-9" />
+            <BrandLogo href="/" className="h-8 md:h-9" />
             <span className="hidden h-7 w-px bg-border md:block" />
             <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground md:block">
               Client onboarding
