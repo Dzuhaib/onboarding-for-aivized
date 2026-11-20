@@ -481,7 +481,7 @@ export function OnboardingForm() {
               <div className="flex flex-wrap items-center gap-3">
                 <Button type="submit" className="rounded-full px-7 shadow-primary" disabled={submitting}>
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Submit onboarding
+                  {submitting ? "Sending..." : "Submit onboarding"}
                 </Button>
               </div>
 
