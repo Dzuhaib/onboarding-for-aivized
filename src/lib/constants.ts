@@ -76,6 +76,7 @@ export const PROJECT_URGENCIES = ["Low", "Medium", "High", "Critical"] as const;
 
 export const TEAM_MEMBERS = [
   "Miss PA",
+  "Faiza Faisal",
   "Ameer Hamza",
   "Sana Farasat",
   "Shagufta",
