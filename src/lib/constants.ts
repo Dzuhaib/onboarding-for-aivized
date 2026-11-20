@@ -9,7 +9,7 @@ export const PROJECT_TYPES = [
   "Custom Software Development",
   "Mobile Application",
   "Website Redesign",
-  "SEO and Digital Optimization",
+  "SEO & AI Search Visibility",
   "Other",
 ] as const;
 
